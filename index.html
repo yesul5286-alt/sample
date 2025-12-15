@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>온라인 마트</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .search-bar {
+            flex: 1;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 12px 40px 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .cart-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s;
+        }
+
+        .cart-button:hover {
+            transform: scale(1.05);
+        }
+
+        .cart-count {
+            background: white;
+            color: #667eea;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .categories {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        .category-btn {
+            background: white;
+            border: 2px solid transparent;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .category-btn:hover, .category-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .product-emoji {
+            font-size: 80px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .product-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .product-unit {
+            color: #999;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .product-price {
+            font-size: 22px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .add-to-cart {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .add-to-cart:hover {
+            transform: scale(1.05);
+        }
+
+        .cart-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            max-width: 400px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.2);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .cart-modal.open {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .cart-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-cart {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .cart-items {
+            padding: 20px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .cart-item-price {
+            color: #667eea;
+        }
+
+        .cart-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .qty-btn {
+            background: #f0f0f0;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qty-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .cart-total {
+            padding: 20px;
+            border-top: 2px solid #e0e0e0;
+            position: sticky;
+            bottom: 0;
+            background: white;
+        }
+
+        .total-price {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            text-align: right;
+            margin-bottom: 15px;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 50px 20px;
+            color: #999;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo">🛒 프레시 마트</div>
+                <div class="search-bar">
+                    <input type="text" placeholder="상품을 검색하세요..." id="searchInput">
+                </div>
+                <button class="cart-button" onclick="toggleCart()">
+                    장바구니 <span class="cart-count" id="cartCount">0</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="categories" id="categories"></div>
+        <div class="products-grid" id="productsGrid"></div>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="toggleCart()"></div>
+    
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-header">
+            <h2>장바구니</h2>
+            <button class="close-cart" onclick="toggleCart()">✕</button>
+        </div>
+        <div class="cart-items" id="cartItems"></div>
+        <div class="cart-total">
+            <div class="total-price" id="totalPrice">총액: 0원</div>
+            <button class="checkout-btn" onclick="checkout()">결제하기</button>
+        </div>
+    </div>
+
+    <script>
+        var categories = ['전체', '과일/채소', '정육/계란', '수산물', '유제품', '음료', '과자/간식', '생활용품'];
+        
+        var products = [
+            { id: 1, name: '신선한 딸기', category: '과일/채소', price: 12900, emoji: '🍓', unit: '1팩' },
+            { id: 2, name: '바나나', category: '과일/채소', price: 3500, emoji: '🍌', unit: '1송이' },
+            { id: 3, name: '우유 2L', category: '유제품', price: 4800, emoji: '🥛', unit: '1개' },
+            { id: 4, name: '계란 30구', category: '정육/계란', price: 7900, emoji: '🥚', unit: '1판' },
+            { id: 5, name: '삼겹살', category: '정육/계란', price: 18900, emoji: '🥓', unit: '600g' },
+            { id: 6, name: '고등어', category: '수산물', price: 8500, emoji: '🐟', unit: '2마리' },
+            { id: 7, name: '토마토', category: '과일/채소', price: 5900, emoji: '🍅', unit: '1kg' },
+            { id: 8, name: '치즈', category: '유제품', price: 6800, emoji: '🧀', unit: '1개' },
+            { id: 9, name: '콜라', category: '음료', price: 2500, emoji: '🥤', unit: '1.5L' },
+            { id: 10, name: '감자칩', category: '과자/간식', price: 3200, emoji: '🍟', unit: '1봉' },
+            { id: 11, name: '티슈', category: '생활용품', price: 8900, emoji: '🧻', unit: '3입' },
+            { id: 12, name: '샴푸', category: '생활용품', price: 12000, emoji: '🧴', unit: '500ml' }
+        ];
+
+        var cart = [];
+        var currentCategory = '전체';
+
+        function init() {
+            renderCategories();
+            renderProducts();
+            updateCartDisplay();
+        }
+
+        function renderCategories() {
+            var container = document.getElementById('categories');
+            var html = '';
+            for (var i = 0; i < categories.length; i++) {
+                var cat = categories[i];
+                var activeClass = cat === currentCategory ? 'active' : '';
+                html += '<button class="category-btn ' + activeClass + '" onclick="filterByCategory(\'' + cat + '\')">' + cat + '</button>';
+            }
+            container.innerHTML = html;
+        }
+
+        function filterByCategory(category) {
+            currentCategory = category;
+            renderCategories();
+            renderProducts();
+        }
+
+        function renderProducts() {
+            var container = document.getElementById('productsGrid');
+            var searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            var filtered = products.filter(function(p) {
+                return (currentCategory === '전체' || p.category === currentCategory) &&
+                       (searchTerm === '' || p.name.toLowerCase().indexOf(searchTerm) !== -1);
+            });
+
+            var html = '';
+            for (var i = 0; i < filtered.length; i++) {
+                var product = filtered[i];
+                html += '<div class="product-card">' +
+                    '<div class="product-emoji">' + product.emoji + '</div>' +
+                    '<div class="product-name">' + product.name + '</div>' +
+                    '<div class="product-unit">' + product.unit + '</div>' +
+                    '<div class="product-price">' + product.price.toLocaleString() + '원</div>' +
+                    '<button class="add-to-cart" onclick="addToCart(' + product.id + ')">장바구니 담기</button>' +
+                    '</div>';
+            }
+            container.innerHTML = html;
+        }
+
+        function addToCart(productId) {
+            var product = products.find(function(p) { return p.id === productId; });
+            var existingItem = cart.find(function(item) { return item.id === productId; });
+
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                var newItem = Object.assign({}, product);
+                newItem.quantity = 1;
+                cart.push(newItem);
+            }
+
+            updateCartDisplay();
+        }
+
+        function updateQuantity(productId, change) {
+            var item = cart.find(function(item) { return item.id === productId; });
+            if (item) {
+                item.quantity += change;
+                if (item.quantity <= 0) {
+                    cart = cart.filter(function(item) { return item.id !== productId; });
+                }
+                updateCartDisplay();
+            }
+        }
+
+        function updateCartDisplay() {
+            var cartCount = cart.reduce(function(sum, item) { return sum + item.quantity; }, 0);
+            document.getElementById('cartCount').textContent = cartCount;
+
+            var cartItemsContainer = document.getElementById('cartItems');
+            
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = '<div class="empty-cart">장바구니가 비어있습니다</div>';
+            } else {
+                var html = '';
+                for (var i = 0; i < cart.length; i++) {
+                    var item = cart[i];
+                    html += '<div class="cart-item">' +
+                        '<div class="cart-item-info">' +
+                        '<div class="cart-item-name">' + item.emoji + ' ' + item.name + '</div>' +
+                        '<div class="cart-item-price">' + item.price.toLocaleString() + '원</div>' +
+                        '</div>' +
+                        '<div class="cart-item-controls">' +
+                        '<button class="qty-btn" onclick="updateQuantity(' + item.id + ', -1)">−</button>' +
+                        '<span>' + item.quantity + '</span>' +
+                        '<button class="qty-btn" onclick="updateQuantity(' + item.id + ', 1)">+</button>' +
+                        '</div>' +
+                        '</div>';
+                }
+                cartItemsContainer.innerHTML = html;
+            }
+
+            var total = cart.reduce(function(sum, item) { return sum + (item.price * item.quantity); }, 0);
+            document.getElementById('totalPrice').textContent = '총액: ' + total.toLocaleString() + '원';
+        }
+
+        function toggleCart() {
+            var modal = document.getElementById('cartModal');
+            var overlay = document.getElementById('overlay');
+            
+            if (modal.classList.contains('open')) {
+                modal.classList.remove('open');
+                overlay.classList.remove('show');
+            } else {
+                modal.classList.add('open');
+                overlay.classList.add('show');
+            }
+        }
+
+        function checkout() {
+            if (cart.length === 0) {
+                alert('장바구니가 비어있습니다!');
+                return;
+            }
+            var total = cart.reduce(function(sum, item) { return sum + (item.price * item.quantity); }, 0);
+            alert('총 ' + total.toLocaleString() + '원 결제가 완료되었습니다!\n감사합니다 😊');
+            cart = [];
+            updateCartDisplay();
+            toggleCart();
+        }
+
+        document.getElementById('searchInput').addEventListener('input', renderProducts);
+
+        init();
+    </script>
+</body>
+</html>
